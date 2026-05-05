@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coby's Cafe — Email Automation</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f0; color: #2d2d2d; padding: 2rem 1rem; }
+  .container { max-width: 680px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 2rem; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #999; }
+  .card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e0; padding: 1.5rem; margin-bottom: 1.25rem; }
+  .card h2 { font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem; }
+  .event-row { border: 1px solid #eee; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .name { font-size: 14px; font-weight: 600; }
+  .meta { font-size: 12px; color: #999; margin-top: 2px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+  .badge-new { background: #e8f4fd; color: #1a6fa8; }
+  .badge-done { background: #e8fdf0; color: #1a8a4a; }
+  .badge-processing { background: #fff8e8; color: #a06010; }
+  .badge-error { background: #fde8e8; color: #a01010; }
+  .badge-skipped { background: #f0f0f0; color: #888; }
+  .big-btn { display: block; width: 100%; padding: 14px; background: #2d2d2d; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 1rem; }
+  .big-btn:hover { background: #444; }
+  .big-btn:disabled { background: #bbb; cursor: not-allowed; }
+  #log { background: #1a1a1a; color: #00e87a; font-family: monospace; font-size: 12px; padding: 1rem; border-radius: 8px; min-height: 60px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; margin-top: 1rem; display: none; }
+  .downloads { margin-top: 1.5rem; display: none; }
+  .downloads h3 { font-size: 14px; font-weight: 600; color: #1a8a4a; margin-bottom: 12px; }
+  .download-item { background: #f0f9f0; border: 1px solid #b0e0b0; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .download-item .dname { font-size: 13px; font-weight: 600; }
+  .dl-btn { padding: 7px 16px; background: #1a8a4a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .dl-btn:hover { background: #157a40; }
+  .instructions { background: #e8f4fd; border: 1px solid #b0d0f0; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; display: none; }
+  .instructions h3 { font-size: 14px; font-weight: 600; color: #1a6fa8; margin-bottom: 8px; }
+  .instructions ol { font-size: 13px; color: #333; line-height: 2; padding-left: 1.2rem; }
+  .empty { font-size: 13px; color: #bbb; padding: 8px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🐾 Coby's Cafe</h1>
+    <p class="subtitle">Email Template Automation</p>
+  </div>
+
+  <div class="card">
+    <h2>📋 Upcoming Events</h2>
+    <div id="events-list"><p class="empty">Loading events...</p></div>
+  </div>
+
+  <button class="big-btn" id="createBtn" onclick="runAutomation()" disabled>
+    Generate Email Templates
+  </button>
+
+  <div id="log"></div>
+
+  <div class="downloads" id="downloads">
+    <h3>✅ Templates Ready — Download & Import into Mailjet</h3>
+    <div id="download-list"></div>
+  </div>
+
+  <div class="instructions" id="instructions">
+    <h3>📥 How to import into Mailjet</h3>
+    <ol>
+      <li>Download each HTML file above</li>
+      <li>Go to <strong>Mailjet → Content → Email Templates</strong></li>
+      <li>Click <strong>"Create a template"</strong></li>
+      <li>Choose <strong>"By coding it in HTML"</strong></li>
+      <li>Choose <strong>"Import HTML from a file"</strong></li>
+      <li>Upload the downloaded file & name it after the event</li>
+      <li>Save — your template is ready! 🎉</li>
+    </ol>
+  </div>
+
+</div>
+<script>
+let parsedEvents = [];
+let generatedFiles = {};
+
+function log(msg) {
+  const el = document.getElementById('log');
+  el.style.display = 'block';
+  el.textContent += msg + '\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function setBadge(i, type, label) {
+  const el = document.getElementById('badge-' + i);
+  if (el) { el.className = 'badge badge-' + type; el.textContent = label; }
+}
+
+function renderEvents() {
+  const c = document.getElementById('events-list');
+  if (!parsedEvents.length) { c.innerHTML = '<p class="empty">No events found.</p>'; return; }
+  c.innerHTML = parsedEvents.map((e, i) => {
+    const s = e.status.toLowerCase();
+    const bc = s === 'new' ? 'badge-new' : s === 'done' ? 'badge-done' : 'badge-skipped';
+    const bl = s === 'new' ? 'New' : s === 'done' ? 'Done' : s || '—';
+    return `<div class="event-row" id="erow-${i}">
+      <div>
+        <div class="name">${e.name || 'Untitled'}</div>
+        <div class="meta">${e.month} · ${e.date} ${e.time ? '| ' + e.time : ''}</div>
+      </div>
+      <span class="badge ${bc}" id="badge-${i}">${bl}</span>
+    </div>`;
+  }).join('');
+}
+
+async function loadEvents() {
+  try {
+    const res = await fetch('/api/events');
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+    parsedEvents = data.events;
+    renderEvents();
+    const newCount = parsedEvents.filter(e => e.status.toLowerCase() === 'new').length;
+    document.getElementById('createBtn').disabled = newCount === 0;
+  } catch(e) {
+    document.getElementById('events-list').innerHTML =
+      '<p style="color:red;font-size:13px;">Could not load events: ' + e.message + '</p>';
+  }
+}
+
+function downloadFile(filename, html) {
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function runAutomation() {
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating templates...';
+  document.getElementById('log').textContent = '';
+  document.getElementById('log').style.display = 'block';
+  document.getElementById('downloads').style.display = 'none';
+  document.getElementById('instructions').style.display = 'none';
+
+  parsedEvents.forEach((e, i) => {
+    if (e.status.toLowerCase() === 'new') setBadge(i, 'processing', 'Processing...');
+  });
+
+  log('Reading Google Sheet and generating templates...\n');
+
+  try {
+    const res = await fetch('/api/run', { method: 'POST' });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    if (data.message) {
+      log(data.message);
+      btn.textContent = 'Generate Email Templates';
+      btn.disabled = false;
+      return;
+    }
+
+    const success = [], failed = [];
+    const dlList = document.getElementById('download-list');
+    dlList.innerHTML = '';
+
+    data.results.forEach((r, i) => {
+      if (r.status === 'success') {
+        log('✅ Generated: "' + r.name + '"');
+        success.push(r);
+
+        // Add download button
+        const div = document.createElement('div');
+        div.className = 'download-item';
+        div.innerHTML = `
+          <div class="dname">${r.name}</div>
+          <button class="dl-btn" onclick="downloadFile('${r.filename}', generatedFiles['${r.filename}'])">
+            ⬇ Download
+          </button>`;
+        dlList.appendChild(div);
+        generatedFiles[r.filename] = r.html;
+
+        // Update badge
+        parsedEvents.forEach((e, idx) => {
+          if (e.name === r.name) setBadge(idx, 'done', 'Done ✓');
+        });
+      } else {
+        log('❌ Failed: "' + r.name + '" — ' + r.error);
+        failed.push(r.name);
+        parsedEvents.forEach((e, idx) => {
+          if (e.name === r.name) setBadge(idx, 'error', 'Error');
+        });
+      }
+    });
+
+    log('\n' + success.length + ' template(s) generated, ' + failed.length + ' failed.');
+
+    if (success.length) {
+      document.getElementById('downloads').style.display = 'block';
+      document.getElementById('instructions').style.display = 'block';
+    }
+
+  } catch(e) {
+    log('Error: ' + e.message);
+    parsedEvents.forEach((ev, i) => {
+      if (ev.status.toLowerCase() === 'new') setBadge(i, 'error', 'Error');
+    });
+  }
+
+  btn.textContent = 'Generate Email Templates';
+  btn.disabled = false;
+}
+
+loadEvents();
+</script>
+</body>
+</html>
