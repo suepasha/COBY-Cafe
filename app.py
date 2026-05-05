@@ -5,11 +5,13 @@ import io
 import re
 import os
 import tempfile
-import threading
-from playwright.sync_api import sync_playwright
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return jsonify({'success': False, 'error': str(e)}), 500
 
 # Mailjet API
 MAILJET_API_KEY    = os.environ.get('MAILJET_API_KEY', '3b7ed6fa7e4d7e777bb144c487625b06')
@@ -133,6 +135,7 @@ def mark_done(event_name):
 
 def import_template_to_mailjet(html_content, template_name):
     """Use Playwright to log into Mailjet and import HTML as a template."""
+    from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
