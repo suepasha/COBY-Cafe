@@ -143,7 +143,7 @@ def run_playwright_import(job_id, event_name, html_content, template_name):
                 log.append('Logging into Mailjet...')
                 page.goto('https://app.mailjet.com/signin', timeout=30000)
                 page.wait_for_load_state('domcontentloaded', timeout=30000)
-                page.wait_for_timeout(3000)
+                page.wait_for_timeout(8000)
                 log.append(f'Login page title: {page.title()}')
                 log.append(f'Login page URL: {page.url}')
 
@@ -151,7 +151,7 @@ def run_playwright_import(job_id, event_name, html_content, template_name):
                 email_filled = False
                 for sel in ['input[type="email"]', 'input[name="email"]', '#email', 'input[placeholder*="mail" i]', 'input:nth-child(1)']:
                     try:
-                        page.fill(sel, MAILJET_EMAIL, timeout=3000)
+                        page.fill(sel, MAILJET_EMAIL, timeout=8000)
                         log.append(f'Email filled using: {sel}')
                         email_filled = True
                         break
@@ -169,7 +169,7 @@ def run_playwright_import(job_id, event_name, html_content, template_name):
                 # Try multiple password selectors
                 for sel in ['input[type="password"]', 'input[name="password"]', '#password']:
                     try:
-                        page.fill(sel, MAILJET_PASSWORD, timeout=3000)
+                        page.fill(sel, MAILJET_PASSWORD, timeout=8000)
                         log.append(f'Password filled using: {sel}')
                         break
                     except:
@@ -184,23 +184,23 @@ def run_playwright_import(job_id, event_name, html_content, template_name):
                     except:
                         continue
 
-                page.wait_for_load_state('networkidle', timeout=30000)
+                page.wait_for_load_state('networkidle', timeout=80000)
                 log.append(f'After login - URL: {page.url} Title: {page.title()}')
 
-                page.goto('https://app.mailjet.com/templates/marketing', timeout=30000)
-                page.wait_for_load_state('networkidle', timeout=30000)
+                page.goto('https://app.mailjet.com/templates/marketing', timeout=80000)
+                page.wait_for_load_state('networkidle', timeout=80000)
                 log.append(f'Templates page: {page.title()}')
 
                 page.click('text=Create a template', timeout=15000)
-                page.wait_for_load_state('networkidle', timeout=30000)
+                page.wait_for_load_state('networkidle', timeout=80000)
                 log.append('Clicked Create template')
 
                 page.click('text=By coding it in HTML', timeout=15000)
-                page.wait_for_load_state('networkidle', timeout=30000)
+                page.wait_for_load_state('networkidle', timeout=80000)
                 log.append('Clicked HTML option')
 
                 page.click('text=Import HTML from a file', timeout=15000)
-                page.wait_for_load_state('networkidle', timeout=30000)
+                page.wait_for_load_state('networkidle', timeout=80000)
                 log.append('Clicked Import from file')
 
                 with tempfile.NamedTemporaryFile(suffix='.html', delete=False, mode='w') as f:
@@ -217,7 +217,7 @@ def run_playwright_import(job_id, event_name, html_content, template_name):
                     log.append('Name entered')
 
                 page.click('text=Continue', timeout=10000)
-                page.wait_for_load_state('networkidle', timeout=30000)
+                page.wait_for_load_state('networkidle', timeout=80000)
                 log.append('Done!')
 
                 browser.close()
