@@ -16,7 +16,7 @@ MAILJET_SECRET_KEY = os.environ.get('MAILJET_SECRET_KEY', '8a3a0f2e26c51aadaacfc
 MJ_AUTH = (MAILJET_API_KEY, MAILJET_SECRET_KEY)
 MJ_BASE = "https://api.mailjet.com/v3/REST"
 MAILJET_EMAIL    = os.environ.get('MAILJET_EMAIL', 'suepasha@yahoo.com')
-MAILJET_PASSWORD = os.environ.get('MAILJET_PASSWORD', 'Suepasha070!')
+MAILJET_PASSWORD = os.environ.get('MAILJET_PASSWORD', 'Super070!')
 
 SHEET_CSV_URL = (
     "https://docs.google.com/spreadsheets/d/"
