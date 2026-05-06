@@ -19,18 +19,22 @@
   .badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
   .badge-new { background: #e8f4fd; color: #1a6fa8; }
   .badge-done { background: #e8fdf0; color: #1a8a4a; }
-  .badge-processing { background: #fff8e8; color: #a06010; }
   .badge-error { background: #fde8e8; color: #a01010; }
   .badge-skipped { background: #f0f0f0; color: #888; }
   .big-btn { display: block; width: 100%; padding: 14px; background: #2d2d2d; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 1rem; }
   .big-btn:hover { background: #444; }
   .big-btn:disabled { background: #bbb; cursor: not-allowed; }
-  #log { background: #1a1a1a; color: #00e87a; font-family: monospace; font-size: 12px; padding: 1rem; border-radius: 8px; min-height: 60px; max-height: 260px; overflow-y: auto; white-space: pre-wrap; margin-top: 1rem; display: none; }
-  .success-box { background: #e8fdf0; border: 1px solid #a0d8b0; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; display: none; }
-  .success-box h3 { font-size: 14px; color: #1a8a4a; margin-bottom: 6px; }
-  .success-box p { font-size: 13px; color: #333; line-height: 1.6; }
+  #log { background: #1a1a1a; color: #00e87a; font-family: monospace; font-size: 12px; padding: 1rem; border-radius: 8px; min-height: 60px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; margin-top: 1rem; display: none; }
+  .downloads { margin-top: 1.5rem; display: none; }
+  .downloads h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .download-item { background: #f5f5f0; border: 1px solid #e0e0d8; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .download-item .dname { font-size: 13px; font-weight: 600; }
+  .dl-btn { padding: 7px 16px; background: #2d2d2d; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .dl-btn:hover { background: #444; }
+  .instructions { background: #e8f4fd; border: 1px solid #b0d0f0; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; }
+  .instructions h3 { font-size: 14px; font-weight: 600; color: #1a6fa8; margin-bottom: 8px; }
+  .instructions ol { font-size: 13px; color: #333; line-height: 2; padding-left: 1.2rem; }
   .empty { font-size: 13px; color: #bbb; padding: 8px 0; }
-  .progress { font-size: 13px; color: #888; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -45,21 +49,33 @@
     <div id="events-list"><p class="empty">Loading events...</p></div>
   </div>
 
-  <button class="big-btn" id="createBtn" onclick="runAutomation()" disabled>
-    Create New Templates in Mailjet
+  <button class="big-btn" id="generateBtn" onclick="runAutomation()" disabled>
+    Generate Email Templates
   </button>
 
   <div id="log"></div>
 
-  <div class="success-box" id="successBox">
-    <h3>✅ Done!</h3>
-    <p id="successText"></p>
+  <div class="downloads" id="downloads">
+    <h3>📥 Step 1 — Download your HTML files</h3>
+    <div id="download-list"></div>
+
+    <div class="instructions" style="margin-top:1rem;">
+      <h3>📤 Step 2 — Import into Mailjet</h3>
+      <ol>
+        <li>Go to <strong>Mailjet → Content → Email Templates</strong></li>
+        <li>Click <strong>"Create a template"</strong></li>
+        <li>Choose <strong>"By coding it in HTML"</strong></li>
+        <li>Choose <strong>"Import HTML from a file"</strong></li>
+        <li>Upload the downloaded file & name it after the event</li>
+        <li>Save — drag-and-drop editing works! 🎉</li>
+      </ol>
+    </div>
   </div>
 </div>
 
 <script>
 let parsedEvents = [];
-let pollInterval = null;
+let generatedFiles = {};
 
 function log(msg) {
   const el = document.getElementById('log');
@@ -98,97 +114,74 @@ async function loadEvents() {
     parsedEvents = data.events;
     renderEvents();
     const newCount = parsedEvents.filter(e => e.status.toLowerCase() === 'new').length;
-    document.getElementById('createBtn').disabled = newCount === 0;
+    document.getElementById('generateBtn').disabled = newCount === 0;
   } catch(e) {
-    document.getElementById('events-list').innerHTML = '<p style="color:red;font-size:13px;">Could not load events: ' + e.message + '</p>';
+    document.getElementById('events-list').innerHTML = '<p style="color:red;font-size:13px;">Error: ' + e.message + '</p>';
   }
 }
 
-async function pollStatus(jobId, total) {
-  try {
-    const res = await fetch('/api/status/' + jobId);
-    const data = await res.json();
-    if (!data.success) return;
-
-    const results = Array.isArray(data.results) ? data.results : [];
-    log('Progress: ' + results.length + '/' + total + ' processed...');
-
-    results.forEach(r => {
-      if (!r || !r.name) return;
-      parsedEvents.forEach((e, i) => {
-        if (e.name === r.name) {
-          if (r.status === 'success') setBadge(i, 'done', 'Done ✓');
-          else setBadge(i, 'error', 'Error');
-        }
-      });
-    });
-
-    if (data.status === 'done') {
-      clearInterval(pollInterval);
-      const success = results.filter(r => r.status === 'success');
-      const failed = results.filter(r => r.status === 'error');
-
-      log('\n🎉 Done! ' + success.length + ' created, ' + failed.length + ' failed.');
-      failed.forEach(r => log('❌ ' + r.name + ': ' + (r.error || '')));
-
-      if (success.length) {
-        document.getElementById('successBox').style.display = 'block';
-        document.getElementById('successText').innerHTML =
-          '<strong>' + success.length + ' template(s)</strong> created in Mailjet: <em>' +
-          success.map(r=>r.name).join(', ') + '</em>.<br><br>' +
-          'Go to <strong>Content → Email Templates</strong> in Mailjet to find them.';
-      }
-
-      document.getElementById('createBtn').disabled = false;
-      document.getElementById('createBtn').textContent = 'Create New Templates in Mailjet';
-    }
-  } catch(e) {
-    log('Poll error: ' + e.message);
-  }
+function downloadFile(filename) {
+  const html = generatedFiles[filename];
+  const blob = new Blob([html], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
 }
 
 async function runAutomation() {
-  const btn = document.getElementById('createBtn');
+  const btn = document.getElementById('generateBtn');
   btn.disabled = true;
-  btn.textContent = 'Working... (this may take a few minutes)';
+  btn.textContent = 'Generating...';
   document.getElementById('log').textContent = '';
   document.getElementById('log').style.display = 'block';
-  document.getElementById('successBox').style.display = 'none';
+  document.getElementById('downloads').style.display = 'none';
+  generatedFiles = {};
 
   parsedEvents.forEach((e, i) => {
-    if (e.status.toLowerCase() === 'new') setBadge(i, 'processing', 'Processing...');
+    if (e.status.toLowerCase() === 'new') setBadge(i, 'badge-new', 'Processing...');
   });
 
-  log('Starting automation...\n');
+  log('Reading Google Sheet and generating templates...');
 
   try {
-    const res = await fetch('/api/run', { method: 'POST' });
+    const res = await fetch('/api/run', {method: 'POST'});
     const data = await res.json();
 
-    if (!data.success) {
-      log('❌ Error: ' + data.error);
-      btn.disabled = false;
-      btn.textContent = 'Create New Templates in Mailjet';
-      return;
-    }
+    if (!data.success) { log('❌ Error: ' + data.error); btn.disabled = false; btn.textContent = 'Generate Email Templates'; return; }
+    if (data.message) { log('ℹ️ ' + data.message); btn.disabled = false; btn.textContent = 'Generate Email Templates'; return; }
 
-    if (data.message) {
-      log('ℹ️ ' + data.message);
-      btn.disabled = false;
-      btn.textContent = 'Create New Templates in Mailjet';
-      return;
-    }
+    const dlList = document.getElementById('download-list');
+    dlList.innerHTML = '';
+    let successCount = 0;
 
-    log('Job started! ID: ' + data.job_id + ' | Processing ' + data.total + ' event(s)...');
-    log('Please wait — logging into Mailjet and importing templates...\n');
+    data.results.forEach(r => {
+      parsedEvents.forEach((e, i) => {
+        if (e.name === r.name) setBadge(i, r.status === 'success' ? 'done' : 'error', r.status === 'success' ? 'Done ✓' : 'Error');
+      });
 
-    pollInterval = setInterval(() => pollStatus(data.job_id, data.total), 5000);
+      if (r.status === 'success') {
+        log('✅ Generated: ' + r.name);
+        generatedFiles[r.filename] = r.html;
+        successCount++;
+        const div = document.createElement('div');
+        div.className = 'download-item';
+        div.innerHTML = `<div class="dname">${r.name}</div><button class="dl-btn" onclick="downloadFile('${r.filename}')">⬇ Download</button>`;
+        dlList.appendChild(div);
+      } else {
+        log('❌ Failed: ' + r.name + ' — ' + r.error);
+      }
+    });
+
+    log('\n' + successCount + ' template(s) ready for download!');
+    if (successCount > 0) document.getElementById('downloads').style.display = 'block';
 
   } catch(e) {
     log('❌ Error: ' + e.message);
-    btn.disabled = false;
-    btn.textContent = 'Create New Templates in Mailjet';
   }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate Email Templates';
 }
 
 loadEvents();

@@ -4,9 +4,6 @@ import csv
 import io
 import re
 import os
-import tempfile
-import threading
-import time
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
@@ -15,17 +12,14 @@ MAILJET_API_KEY    = os.environ.get('MAILJET_API_KEY', '3b7ed6fa7e4d7e777bb144c4
 MAILJET_SECRET_KEY = os.environ.get('MAILJET_SECRET_KEY', '8a3a0f2e26c51aadaacfcd250b3126cf')
 MJ_AUTH = (MAILJET_API_KEY, MAILJET_SECRET_KEY)
 MJ_BASE = "https://api.mailjet.com/v3/REST"
-MAILJET_EMAIL    = os.environ.get('MAILJET_EMAIL', 'suepasha@yahoo.com')
-MAILJET_PASSWORD = os.environ.get('MAILJET_PASSWORD', 'Super070!')
 
 SHEET_CSV_URL = (
     "https://docs.google.com/spreadsheets/d/"
     "1N1lO3PdUqX9U4chc1sZXpP_zzfHYwXyfzpEXO4BxYWs"
     "/export?format=csv"
 )
-APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoRuw5zraZ_g-g3BioEbReo-m_e_N_glPikd8eJrGmsCe-Pr__cjR4_UX84ZxudQhR/exec"
 
-jobs = {}
+APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoRuw5zraZ_g-g3BioEbReo-m_e_N_glPikd8eJrGmsCe-Pr__cjR4_UX84ZxudQhR/exec"
 
 ALIASES = {
     'name':        ['event name'],
@@ -105,150 +99,6 @@ def mark_done(event_name):
     except:
         pass
 
-def playwright_import(event_name, html_content, job_id):
-    log = []
-    try:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=[
-                    '--disable-blink-features=AutomationControlled',
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage'
-                ]
-            )
-            context = browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                viewport={'width': 1280, 'height': 800},
-                locale='en-US'
-            )
-            context.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-            page = context.new_page()
-            try:
-                log.append('Opening Mailjet login...')
-                page.goto('https://app.mailjet.com/signin', timeout=30000)
-                page.wait_for_load_state('domcontentloaded', timeout=30000)
-                page.wait_for_timeout(3000)
-                log.append(f'Login page: {page.url} | {page.title()}')
-
-                # Accept cookie popup by clicking Allow All (button index 3)
-                try:
-                    buttons = page.query_selector_all('button')
-                    for btn in buttons:
-                        txt = btn.inner_text().strip()
-                        if txt in ['Allow All', 'Accept Cookies', 'Accept all', 'Accept']:
-                            btn.click()
-                            log.append(f'Clicked cookie button: {txt}')
-                            page.wait_for_timeout(2000)
-                            break
-                except Exception as ce:
-                    log.append(f'Cookie click error: {ce}')
-
-                # Now fill email - look for visible inputs
-                page.wait_for_timeout(1000)
-                all_inputs = page.query_selector_all('input:visible')
-                log.append(f'Visible inputs: {len(all_inputs)}')
-                for idx, inp in enumerate(all_inputs):
-                    t = inp.get_attribute('type') or 'text'
-                    n = inp.get_attribute('name') or ''
-                    log.append(f'Input {idx}: type={t} name={n}')
-
-                # Fill email
-                email_done = False
-                for sel in ['input[type="email"]', 'input[name="email"]', 'input[name="_username"]', '#email']:
-                    try:
-                        page.fill(sel, MAILJET_EMAIL, timeout=3000)
-                        log.append(f'Email: {sel}')
-                        email_done = True
-                        break
-                    except:
-                        continue
-                if not email_done and all_inputs:
-                    all_inputs[0].fill(MAILJET_EMAIL)
-                    log.append('Email via first input')
-
-                # Fill password
-                for sel in ['input[type="password"]', 'input[name="password"]', 'input[name="_password"]']:
-                    try:
-                        page.fill(sel, MAILJET_PASSWORD, timeout=3000)
-                        log.append(f'Password: {sel}')
-                        break
-                    except:
-                        continue
-
-                # Click login button
-                page.wait_for_timeout(500)
-                login_clicked = False
-                for sel in ['text=Log in to Mailjet', 'button[type="submit"]', 'input[type="submit"]']:
-                    try:
-                        page.click(sel, timeout=5000)
-                        log.append(f'Clicked: {sel}')
-                        login_clicked = True
-                        break
-                    except:
-                        continue
-
-                page.wait_for_load_state('networkidle', timeout=30000)
-                log.append(f'After login: {page.url}')
-
-                if 'signin' in page.url:
-                    raise Exception(f'Login failed - still on signin page. Check credentials.')
-
-                                # Go to templates
-                page.goto('https://app.mailjet.com/templates/marketing', timeout=30000)
-                page.wait_for_load_state('networkidle', timeout=30000)
-                log.append(f'Templates page: {page.title()}')
-
-                page.click('text=Create a template', timeout=15000)
-                page.wait_for_load_state('networkidle', timeout=30000)
-                log.append('Clicked Create template')
-
-                page.click('text=By coding it in HTML', timeout=15000)
-                page.wait_for_load_state('networkidle', timeout=30000)
-                log.append('Clicked HTML option')
-
-                page.click('text=Import HTML from a file', timeout=15000)
-                page.wait_for_load_state('networkidle', timeout=30000)
-                log.append('Clicked Import from file')
-
-                with tempfile.NamedTemporaryFile(suffix='.html', delete=False, mode='w') as f:
-                    f.write(html_content)
-                    tmp_path = f.name
-
-                page.set_input_files('input[type="file"]', tmp_path, timeout=15000)
-                os.unlink(tmp_path)
-                log.append('File uploaded')
-
-                name_input = page.query_selector('input[placeholder*="name" i], input[name*="name"], #template-name')
-                if name_input:
-                    name_input.fill(event_name)
-                    log.append('Name entered')
-
-                page.click('text=Continue', timeout=10000)
-                page.wait_for_load_state('networkidle', timeout=30000)
-                log.append('Done!')
-                browser.close()
-
-                mark_done(event_name)
-                jobs[job_id]['results'].append({'name': event_name, 'status': 'success', 'log': ' | '.join(log)})
-
-            except Exception as e:
-                log.append(f'ERROR: {str(e)}')
-                try: browser.close()
-                except: pass
-                jobs[job_id]['results'].append({'name': event_name, 'status': 'error', 'error': ' | '.join(log)})
-
-    except Exception as e:
-        jobs[job_id]['results'].append({'name': event_name, 'status': 'error', 'error': str(e)})
-
-def run_job(job_id, new_events, base_html):
-    jobs[job_id]['status'] = 'running'
-    for event in new_events:
-        filled = fill_template(base_html, event)
-        playwright_import(event['name'], filled, job_id)
-    jobs[job_id]['status'] = 'done'
-
 @app.route('/')
 def index():
     return send_from_directory(BASE_DIR, 'index.html')
@@ -271,57 +121,31 @@ def run_automation():
         new_events = [e for e in events if e['status'].lower() == 'new']
 
         if not new_events:
-            return jsonify({'success': True, 'job_id': None, 'message': 'No new events found.'})
+            return jsonify({'success': True, 'results': [], 'message': 'No new events found.'})
 
         base_html, error = get_base_html()
         if error:
             return jsonify({'success': False, 'error': error}), 500
 
-        job_id = str(int(time.time()))
-        jobs[job_id] = {'status': 'queued', 'results': [], 'total': len(new_events)}
+        results = []
+        for event in new_events:
+            try:
+                filled = fill_template(base_html, event)
+                filename = re.sub(r'[^a-zA-Z0-9]+', '_', event['name']) + '.html'
+                mark_done(event['name'])
+                results.append({
+                    'name': event['name'],
+                    'status': 'success',
+                    'html': filled,
+                    'filename': filename
+                })
+            except Exception as ex:
+                results.append({'name': event['name'], 'status': 'error', 'error': str(ex)})
 
-        t = threading.Thread(target=run_job, args=(job_id, new_events, base_html))
-        t.daemon = True
-        t.start()
-
-        return jsonify({'success': True, 'job_id': job_id, 'total': len(new_events)})
+        return jsonify({'success': True, 'results': results})
 
     except Exception as ex:
         return jsonify({'success': False, 'error': str(ex)}), 500
-
-@app.route('/api/status/<job_id>', methods=['GET'])
-def job_status(job_id):
-    job = jobs.get(job_id)
-    if not job:
-        return jsonify({'success': False, 'error': 'Job not found'}), 404
-    return jsonify({'success': True, **job})
-
-@app.route('/api/test', methods=['GET'])
-def test_playwright():
-    try:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=[
-                    '--disable-blink-features=AutomationControlled',
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage'
-                ]
-            )
-            context = browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                viewport={'width': 1280, 'height': 800},
-                locale='en-US'
-            )
-            context.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-            page = context.new_page()
-            page.goto('https://example.com')
-            title = page.title()
-            browser.close()
-            return jsonify({'success': True, 'title': title})
-    except Exception as ex:
-        return jsonify({'success': False, 'error': str(ex)})
 
 if __name__ == '__main__':
     app.run(debug=False)
