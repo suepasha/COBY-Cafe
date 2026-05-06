@@ -191,6 +191,20 @@ def import_template_to_mailjet(html_content, template_name):
             browser.close()
             return False, str(e)
 
+@app.route('/api/test', methods=['GET'])
+def test_playwright():
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto('https://example.com')
+            title = page.title()
+            browser.close()
+            return jsonify({'success': True, 'title': title})
+    except Exception as ex:
+        return jsonify({'success': False, 'error': str(ex)})
+
 @app.route('/')
 def index():
     return send_from_directory(BASE_DIR, 'index.html')
