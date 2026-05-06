@@ -136,6 +136,71 @@ def mark_done(event_name):
 def import_template_to_mailjet(html_content, template_name):
     """Use Playwright to log into Mailjet and import HTML as a template."""
     from playwright.sync_api import sync_playwright
+    log = []
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context()
+        page = context.new_page()
+        try:
+            log.append('Going to signin page...')
+            page.goto('https://app.mailjet.com/signin', timeout=30000)
+            page.wait_for_load_state('networkidle', timeout=30000)
+            log.append(f'Page title: {page.title()}')
+            log.append('Filling email...')
+            page.fill('input[type="email"]', MAILJET_EMAIL, timeout=10000)
+            log.append('Filling password...')
+            page.fill('input[type="password"]', MAILJET_PASSWORD, timeout=10000)
+            log.append('Clicking submit...')
+            page.click('button[type="submit"]', timeout=10000)
+            page.wait_for_load_state('networkidle', timeout=30000)
+            log.append(f'After login title: {page.title()}')
+            log.append('Going to templates page...')
+            page.goto('https://app.mailjet.com/templates/marketing', timeout=30000)
+            page.wait_for_load_state('networkidle', timeout=30000)
+            log.append(f'Templates page title: {page.title()}')
+            log.append('Clicking Create a template...')
+            page.click('text=Create a template', timeout=15000)
+            page.wait_for_load_state('networkidle', timeout=30000)
+            log.append('Clicking By coding it in HTML...')
+            page.click('text=By coding it in HTML', timeout=15000)
+            page.wait_for_load_state('networkidle', timeout=30000)
+            log.append('Clicking Import HTML from a file...')
+            page.click('text=Import HTML from a file', timeout=15000)
+            page.wait_for_load_state('networkidle', timeout=30000)
+            log.append('Uploading file...')
+            with tempfile.NamedTemporaryFile(suffix='.html', delete=False, mode='w') as f:
+                f.write(html_content)
+                tmp_path = f.name
+            page.set_input_files('input[type="file"]', tmp_path, timeout=10000)
+            os.unlink(tmp_path)
+            log.append('Entering template name...')
+            name_input = page.query_selector('input[placeholder*="name"], input[name*="name"], #template-name')
+            if name_input:
+                name_input.fill(template_name)
+            log.append('Clicking Continue...')
+            page.click('text=Continue', timeout=10000)
+            page.wait_for_load_state('networkidle', timeout=30000)
+            log.append('Done!')
+            browser.close()
+            return True, ' | '.join(log)
+        except Exception as e:
+            log.append(f'ERROR: {str(e)}')
+            try:
+                browser.close()
+            except:
+                pass
+            return False, ' | '.join(log)
+
+
+def mark_done(event_name):
+    try:
+        requests.post(APPS_SCRIPT_URL, json={'eventName': event_name}, timeout=10)
+    except Exception:
+        pass
+
+def import_template_to_mailjet(html_content, template_name):
+    """Use Playwright to log into Mailjet and import HTML as a template."""
+    from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
