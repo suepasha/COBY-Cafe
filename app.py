@@ -21,6 +21,95 @@ SHEET_CSV_URL = (
 
 APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoRuw5zraZ_g-g3BioEbReo-m_e_N_glPikd8eJrGmsCe-Pr__cjR4_UX84ZxudQhR/exec"
 
+MJML_BASE = """<mjml dir="ltr" lang="en" owa="desktop" version="4.14.1">
+  <mj-head>
+    <mj-font href="https://fonts.googleapis.com/css2?family=arial:wght@300;400;500;700;800;900" name="arial"></mj-font>
+    <mj-font href="https://fonts.googleapis.com/css2?family=Josefin%20Sans:wght@300;400;500;700;800;900" name="Josefin Sans, Arial, sans-serif"></mj-font>
+    <mj-preview></mj-preview>
+  </mj-head>
+  <mj-body background-color="#ffffff" color="#8b94a7" font-family="Josefin Sans, Arial, sans-serif">
+    <mj-section background-color="#ffffff" background-repeat="repeat" background-size="auto" padding="0px 0px 0px 0px" vertical-align="top">
+      <mj-column>
+        <mj-image align="center" alt="" border="none" container-background-color="#e0d3c3" height="auto" padding="10px 25px 10px 25px" src="https://sjqzn.mjt.lu/img2/sjqzn/519a4db6-cda9-4e32-8e6f-608386b2fadd/content" target="_blank" title="" width="200px"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#f4f4f4" background-repeat="repeat" background-size="auto" padding="5px 0px 5px 0px" vertical-align="top">
+      <mj-column>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="font-family:Josefin Sans, sans-serif;font-size:30px;font-weight:bold;text-align:center;color:#000000;line-height:40px;letter-spacing:0px;margin:20px 40px 10px 40px">EVENT_TITLE</p>
+        </mj-text>
+        <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding-bottom="15px" padding-left="25px" padding-right="25px" padding-top="5px" padding="10px 25px" src="EVENT_IMAGE" target="_blank" title="" width="350px"></mj-image>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="font-family:Josefin Sans;font-size:23px;font-weight:normal;text-align:center;color:#000000;line-height:30px;letter-spacing:0px;margin:5px 20px"><strong>EVENT_DATE</strong></p>
+          <p style="font-family:Josefin Sans, sans-serif;font-size:20px;font-weight:normal;text-align:center;color:#000000;line-height:30px;letter-spacing:0px;margin:5px 30px">EVENT_DESCRIPTION</p>
+        </mj-text>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="text-align: center; margin-top: 10px; margin-bottom: 5px; margin-left: 10px;">
+            <a href="SIGNUP_LINK1" style="background-color:#FFFFFF;color:#000000;border:1px solid #000000;border-radius:10px;padding:10px 20px;text-decoration:none;font-family:Josefin Sans, sans-serif;font-size:20px;font-weight:bold;display:inline-block">SIGNUP_TEXT1</a>
+          </p>
+        </mj-text>
+        BUTTON2_PLACEHOLDER
+        <mj-divider border-color="#E6E6E6" border-style="solid" border-width="2px" padding="10px 25px" width="100%"></mj-divider>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#e0d3c3" background-repeat="repeat" background-size="auto" padding="15px 25px 5px 25px" vertical-align="top">
+      <mj-column>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="text-align: center; margin-top: 5px;">
+            <a href="mailto:info@cobyscafe.com?subject=An%20idea%20for%20meetups%2Fevents" style="display:inline-block;font-family:Josefin Sans, sans-serif;font-size:18px;font-weight:bold;text-decoration:none;padding:5px 10px;border-radius:8px;border:1px solid #2D2D2D;color:#2D2D2D;background-color:#ffffff;">Submit an Event Idea</a>
+          </p>
+        </mj-text>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="text-align: center; margin-top: 0px;">
+            <a href="https://www.cobyscafe.com/membership" style="display:inline-block;font-family:Josefin Sans, sans-serif;font-size:18px;font-weight:bold;text-decoration:none;padding:5px 10px;border-radius:8px;border:1px solid #2D2D2D;color:#2D2D2D;background-color:#ffffff;">Become a Member</a>
+          </p>
+        </mj-text>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="text-align: center; margin-top: 0px;">
+            <a href="https://www.cobyscafe.com/parties" style="display:inline-block;font-family:Josefin Sans, sans-serif;font-size:18px;font-weight:bold;text-decoration:none;padding:5px 10px;border-radius:8px;border:1px solid #2D2D2D;color:#2D2D2D;background-color:#ffffff;">Host a Party</a>
+          </p>
+        </mj-text>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="text-align: center; margin-top: 0px;">
+            <a href="https://www.google.com/maps/search/?api=1&query=Coby's+Cafe+101+Nickerson+St+Seattle+WA" style="display:inline-block;font-family:Josefin Sans, sans-serif;font-size:18px;font-weight:bold;text-decoration:none;padding:5px 10px;border-radius:8px;border:1px solid #2D2D2D;color:#2D2D2D;background-color:#ffffff;" target="_blank" rel="noopener">Leave a Google Review</a>
+          </p>
+        </mj-text>
+        <mj-social align="center" border-radius="25px" container-background-color="transparent" font-size="13px" icon-padding="7px 7px 7px 7px" icon-size="28px" mode="horizontal" text-mode="false">
+          <mj-social-element background-color="#3B5998" href="https://www.facebook.com/people/Cobys-Cafe/61553537724188/" name="facebook-noshare" src="https://static.mailjet.com/ico-social/facebook.png"></mj-social-element>
+          <mj-social-element background-color="#9585F4" href="https://www.instagram.com/cobys.dog.cafe/" name="instagram-noshare" src="https://static.mailjet.com/ico-social/instagram-colored.png"></mj-social-element>
+        </mj-social>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" padding-bottom="0px" padding-top="0px" padding="0px 5px 0px 5px">
+          <p style="text-align: center; margin: 10px 0;">
+            <span style="font-size:12px;font-family:Josefin Sans;color:#131B20;">Coby's Cafe<br>101 Nickerson Street Building B Ste 200<br>Seattle, Washington 98109<br>www.cobyscafe.com</span>
+          </p>
+        </mj-text>
+        <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" padding-bottom="0px" padding-top="0px" padding="10px 25px">
+          <p style="text-align: center; margin: 10px 0;">
+            <span style="font-size:12px;font-family:Josefin Sans;color:#000000;">If you do not wish to receive further communication like this, </span>
+            <a href="[[UNSUB_LINK_EN]]" target="_blank"><span style="font-size:12px;font-family:Josefin Sans;color:#ffffff;"><u>unsubscribe here</u></span></a>
+          </p>
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>"""
+
+BUTTON2_MJML = """<mj-text font-family="Verdana, Helvetica, Arial, sans-serif" frameBorder="0" padding="0px" passport-element="html" width="100%">
+          <head><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet"><style>* {{ font-family: 'Josefin Sans', sans-serif; }}</style></head>
+          <p style="text-align: center; margin-top: 10px; margin-left: 10px;">
+            <a href="SIGNUP_LINK2" style="background-color:#FFFFFF;color:#000000;border:1px solid #000000;border-radius:10px;padding:10px 20px;text-decoration:none;font-family:Josefin Sans, sans-serif;font-size:20px;font-weight:bold;display:inline-block">SIGNUP_TEXT2</a>
+          </p>
+        </mj-text>"""
+
+
+
 ALIASES = {
     'name':        ['event name'],
     'month':       ['month'],
@@ -161,6 +250,7 @@ def get_base_html():
     return BASE_HTML, None
 
 def fill_template(html, event):
+    """Generate MJML for drag-and-drop editing in Mailjet."""
     name  = event['name']
     date  = format_datetime(event['date'], event['time'])
     desc  = event['desc']
@@ -168,36 +258,19 @@ def fill_template(html, event):
     lnk1  = event['signupLink1'] if event['signupLink1'].startswith('http') else '#'
     txt2  = event['signupText2']
     lnk2  = event['signupLink2'] if event['signupLink2'].startswith('http') else ''
-    image = event['image']
+    image = event['image'] if event['image'] and event['image'].startswith('http') else 'https://sjqzn.mjt.lu/img2/sjqzn/1ef5c329-24ef-45e8-9010-9d1d6393531e/content'
 
-    out = html
+    # Build button 2 if needed
+    btn2 = BUTTON2_MJML.replace('SIGNUP_LINK2', lnk2).replace('SIGNUP_TEXT2', txt2) if txt2 and lnk2 else ''
 
-    # Replace title
-    out = out.replace('Cinco de Mayo Fiesta', name)
-
-    # Replace date
-    out = out.replace('May 1 | 6-8PM', date)
-
-    # Replace description
-    out = out.replace('Festive night with a taco bar for people,<br>dog tacos &amp; pawgaritas, and photo ops!', desc)
-    out = out.replace('Festive night with a taco bar for people,<br>dog tacos & pawgaritas, and photo ops!', desc)
-
-    # Replace button 1
-    out = out.replace('https://square.link/u/RmROzE8s', lnk1)
-    out = out.replace('General Ticket', txt1)
-
-    # Replace button 2 or remove if empty
-    if txt2 and lnk2:
-        out = out.replace('https://square.link/u/O3jhGhi1', lnk2)
-        out = out.replace('Member Free Sign Up', txt2)
-    else:
-        import re as _re
-        out = _re.sub(r"<tr><td[^>]*>(?:(?!<tr>).)*?Member Free Sign Up(?:(?!<tr>).)*?</td></tr>", '', out, flags=_re.DOTALL)
-        out = out.replace('Member Free Sign Up', '')
-
-    # Replace image
-    if image and image.startswith('http'):
-        out = out.replace('https://sjqzn.mjt.lu/img2/sjqzn/1ef5c329-24ef-45e8-9010-9d1d6393531e/content', image)
+    out = MJML_BASE
+    out = out.replace('EVENT_TITLE', name)
+    out = out.replace('EVENT_DATE', date)
+    out = out.replace('EVENT_DESCRIPTION', desc)
+    out = out.replace('EVENT_IMAGE', image)
+    out = out.replace('SIGNUP_LINK1', lnk1)
+    out = out.replace('SIGNUP_TEXT1', txt1)
+    out = out.replace('BUTTON2_PLACEHOLDER', btn2)
 
     return out
 
@@ -231,15 +304,11 @@ def run_automation():
         if not new_events:
             return jsonify({'success': True, 'results': [], 'message': 'No new events found.'})
 
-        base_html, error = get_base_html()
-        if error:
-            return jsonify({'success': False, 'error': error}), 500
-
         results = []
         for event in new_events:
             try:
-                filled = fill_template(base_html, event)
-                filename = re.sub(r'[^a-zA-Z0-9]+', '_', event['name']) + '.html'
+                filled = fill_template(None, event)
+                filename = re.sub(r'[^a-zA-Z0-9]+', '_', event['name']) + '.mjml'
                 mark_done(event['name'])
                 results.append({
                     'name': event['name'],
