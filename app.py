@@ -69,11 +69,16 @@ def format_datetime(date, time_str):
     return f"{date} | {time_str}" if time_str else date
 
 def get_base_html():
-    # Use BaseTemplate (ID 7993157) - original HTML import with drag-and-drop support
-    res = requests.get(f"{MJ_BASE}/template/7993157/detailcontent", auth=MJ_AUTH)
-    data = res.json()
+    # Use CobysBaseTemplate which has readable HTML content via API
+    res = requests.get(f"{MJ_BASE}/template?Limit=100", auth=MJ_AUTH)
+    templates = res.json().get('Data', [])
+    base = next((t for t in templates if 'cobysbasetemplate' in t['Name'].lower()), None)
+    if not base:
+        return None, 'CobysBaseTemplate not found in Mailjet.'
+    res2 = requests.get(f"{MJ_BASE}/template/{base['ID']}/detailcontent", auth=MJ_AUTH)
+    data = res2.json()
     if 'Data' not in data or not data['Data']:
-        return None, 'BaseTemplate not found or has no HTML content.'
+        return None, 'CobysBaseTemplate has no HTML content.'
     return data['Data'][0].get('Html-part', ''), None
 
 def fill_template(html, event):
