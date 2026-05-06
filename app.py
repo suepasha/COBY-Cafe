@@ -57,9 +57,11 @@ MJML_BASE = """<mjml dir="ltr" lang="en" owa="desktop" version="4.14.1">
         <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding="10px 25px 15px" src="EVENT_IMAGE" width="350px"></mj-image>
         <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" padding="0px" passport-element="html" width="100%">
           <p style="font-family:'Josefin Sans';font-size:23px;font-weight:normal;text-align:center;color:#000000;line-height:30px;margin:5px 20px"><strong>EVENT_DATE</strong></p>
+          <br>
           <p style="font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:normal;text-align:center;color:#000000;line-height:30px;margin:5px 30px">EVENT_DESCRIPTION</p>
         </mj-text>
         <mj-text font-family="Verdana, Helvetica, Arial, sans-serif" padding="0px" passport-element="html" width="100%">
+          <br>
           <p style="text-align:center;margin-top:10px;margin-bottom:5px;">
             <a href="SIGNUP_LINK1" style="background-color:#FFFFFF;color:#000000;border:1px solid #000000;border-radius:10px;padding:10px 20px;text-decoration:none;font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:bold;display:inline-block">SIGNUP_TEXT1</a>
           </p>
