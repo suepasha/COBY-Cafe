@@ -9,7 +9,8 @@
   body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f0; color: #2d2d2d; padding: 2rem 1rem; }
   .container { max-width: 680px; margin: 0 auto; }
   .header { text-align: center; margin-bottom: 2rem; }
-  h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .logo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
   .subtitle { font-size: 13px; color: #999; }
   .card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e0; padding: 1.5rem; margin-bottom: 1.25rem; }
   .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
@@ -24,9 +25,7 @@
   .meta { font-size: 12px; color: #999; margin-top: 2px; }
   .badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
   .badge-new { background: #e8f4fd; color: #1a6fa8; }
-  .badge-done { background: #e8fdf0; color: #1a8a4a; }
   .badge-error { background: #fde8e8; color: #a01010; }
-  .badge-skipped { background: #f0f0f0; color: #888; }
   .big-btn { display: block; width: 100%; padding: 14px; background: #2d2d2d; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 1rem; transition: background 0.2s; }
   .big-btn:hover { background: #444; }
   .big-btn:disabled { background: #bbb; cursor: not-allowed; }
@@ -40,14 +39,13 @@
   .instructions { background: #e8f4fd; border: 1px solid #b0d0f0; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; }
   .instructions h3 { font-size: 14px; font-weight: 600; color: #1a6fa8; margin-bottom: 8px; }
   .instructions ol { font-size: 13px; color: #333; line-height: 2.2; padding-left: 1.2rem; }
-  .empty { font-size: 13px; color: #bbb; padding: 8px 0; }
-  .event-row.done { opacity: 0.5; }
+  .empty { font-size: 13px; color: #888; text-align: center; padding: 16px; background: #f9f9f7; border-radius: 8px; }
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
-    <img src="https://sjqzn.mjt.lu/img2/sjqzn/519a4db6-cda9-4e32-8e6f-608386b2fadd/content" alt="Coby's Cafe" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:12px;">
+    <img src="https://sjqzn.mjt.lu/img2/sjqzn/519a4db6-cda9-4e32-8e6f-608386b2fadd/content" alt="Coby's Cafe" class="logo">
     <h1>Coby's Cafe</h1>
     <p class="subtitle">Email Template Automation</p>
   </div>
@@ -76,7 +74,6 @@
         <li>Click <strong>"Create a template"</strong></li>
         <li>Choose <strong>"By coding it in MJML"</strong></li>
         <li>Import the downloaded <strong>.mjml</strong> file</li>
-
       </ol>
     </div>
   </div>
@@ -120,23 +117,25 @@ function toggleAll() {
 
 function renderEvents() {
   const c = document.getElementById('events-list');
-  if (!events.length) { c.innerHTML = '<p class="empty">No events found.</p>'; return; }
 
-  c.innerHTML = events.map(e => {
-    const s = e.status.toLowerCase();
-    const isNew = s === 'new';
-    const bc = isNew ? 'badge-new' : s === 'done' ? 'badge-done' : 'badge-skipped';
-    const bl = isNew ? 'New' : s === 'done' ? 'Done' : s || '—';
+  // Only show New events
+  const newEvents = events.filter(e => e.status.toLowerCase() === 'new');
+
+  if (!newEvents.length) {
+    c.innerHTML = '<p class="empty">✅ All caught up! No events with Status = "New".</p>';
+    document.getElementById('selectAllBtn').style.display = 'none';
+    return;
+  }
+
+  c.innerHTML = newEvents.map(e => {
     const safeId = e.name.replace(/[^a-z0-9]/gi, '_');
-    return `<div class="event-row${!isNew ? ' done' : ''}" onclick="${isNew ? `toggleCheck('${safeId}')` : ''}">
-      ${isNew ? `<input type="checkbox" id="chk-${safeId}" checked onchange="updateBtn()" onclick="event.stopPropagation()">` : '<input type="checkbox" disabled>'}
+    return `<div class="event-row" onclick="toggleCheck('${safeId}')">
+      <input type="checkbox" id="chk-${safeId}" checked onchange="updateBtn()" onclick="event.stopPropagation()">
       <div class="event-info">
         <div class="name">${e.name || 'Untitled'}</div>
         <div class="meta">${e.date}${e.time ? ' | ' + e.time : ''}</div>
-        ${e.desc ? '<div class="meta" style="margin-top:3px;">' + e.desc.substring(0,80) + (e.desc.length > 80 ? '...' : '') + '</div>' : ''}
-        ${e.signupText1 ? '<div class="meta" style="margin-top:3px;color:#1a6fa8;">' + e.signupText1 + '</div>' : ''}
       </div>
-      <span class="badge ${bc}" id="badge-${safeId}">${bl}</span>
+      <span class="badge badge-new" id="badge-${safeId}">New</span>
     </div>`;
   }).join('');
 
@@ -145,7 +144,7 @@ function renderEvents() {
 
 function toggleCheck(safeId) {
   const chk = document.getElementById('chk-' + safeId);
-  if (chk && !chk.disabled) { chk.checked = !chk.checked; updateBtn(); }
+  if (chk) { chk.checked = !chk.checked; updateBtn(); }
 }
 
 async function loadEvents() {
@@ -155,13 +154,6 @@ async function loadEvents() {
     if (!data.success) throw new Error(data.error);
     events = data.events;
     renderEvents();
-    const newCount = events.filter(e => e.status.toLowerCase() === 'new').length;
-    if (newCount === 0) {
-      const msg = document.createElement('p');
-      msg.style.cssText = 'font-size:13px;color:#888;text-align:center;padding:12px;background:#f9f9f7;border-radius:8px;margin-top:8px;';
-      msg.textContent = '✅ All caught up! No events with Status = New.';
-      document.getElementById('events-list').appendChild(msg);
-    }
   } catch(e) {
     document.getElementById('events-list').innerHTML = `<p style="color:red;font-size:13px;">Error: ${e.message}</p>`;
   }
@@ -205,7 +197,6 @@ async function runAutomation() {
     let successCount = 0;
 
     data.results.forEach(r => {
-      const safeId = r.name.replace(/[^a-z0-9]/gi, '_');
       if (r.status === 'success') {
         log('✅ ' + r.name);
         generatedFiles[r.filename] = r.mjml;
