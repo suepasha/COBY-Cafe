@@ -39,6 +39,8 @@
   .instructions h3 { font-size: 14px; font-weight: 600; color: #1a6fa8; margin-bottom: 8px; }
   .instructions ol { font-size: 13px; color: #333; line-height: 2.2; padding-left: 1.2rem; }
   .empty { font-size: 13px; color: #888; text-align: center; padding: 16px; background: #f9f9f7; border-radius: 8px; }
+  .sub-events { margin-top: 4px; }
+  .sub-event { font-size: 12px; color: #888; line-height: 1.8; }
 </style>
 </head>
 <body>
@@ -93,10 +95,17 @@ const setBadge = (name, type, label) => {
   if (el) { el.className = 'badge badge-' + type; el.textContent = label; }
 };
 
-const getSelected = () => events
-  .filter(e => e.status.toLowerCase() === 'new')
-  .filter(e => document.getElementById('chk-' + e.name.replace(/[^a-z0-9]/gi, '_'))?.checked)
-  .map(e => e.name);
+const getSelected = () => {
+  const newEvents = events.filter(e => e.status.toLowerCase() === 'new');
+  const groups = groupByDueDate(newEvents);
+  const selected = [];
+  Object.entries(groups).forEach(([dueDate, groupEvents]) => {
+    const safeId = dueDate.replace(/[^a-z0-9]/gi, '_');
+    const chk = document.getElementById('chk-' + safeId);
+    if (chk && chk.checked) groupEvents.forEach(e => selected.push(e.name));
+  });
+  return selected;
+};
 
 const updateBtn = () => {
   document.getElementById('generateBtn').disabled = getSelected().length === 0;
@@ -104,19 +113,32 @@ const updateBtn = () => {
 
 function toggleAll() {
   const newEvents = events.filter(e => e.status.toLowerCase() === 'new');
-  const allChecked = newEvents.every(e => document.getElementById('chk-' + e.name.replace(/[^a-z0-9]/gi, '_'))?.checked);
-  newEvents.forEach(e => {
-    const chk = document.getElementById('chk-' + e.name.replace(/[^a-z0-9]/gi, '_'));
+  const groups = groupByDueDate(newEvents);
+  const allChecked = Object.keys(groups).every(due => {
+    const chk = document.getElementById('chk-' + due.replace(/[^a-z0-9]/gi, '_'));
+    return chk && chk.checked;
+  });
+  Object.keys(groups).forEach(due => {
+    const chk = document.getElementById('chk-' + due.replace(/[^a-z0-9]/gi, '_'));
     if (chk) chk.checked = !allChecked;
   });
   document.getElementById('selectAllBtn').textContent = allChecked ? 'Select All' : 'Deselect All';
   updateBtn();
 }
 
+function groupByDueDate(evts) {
+  const groups = {};
+  evts.forEach(e => {
+    const due = e.dueDate && e.dueDate.trim() ? e.dueDate.trim() : 'No Due Date';
+    if (!groups[due]) groups[due] = [];
+    groups[due].push(e);
+  });
+  return groups;
+}
+
 function renderEvents() {
   const c = document.getElementById('events-list');
 
-  // Only show New events
   const newEvents = events.filter(e => e.status.toLowerCase() === 'new');
 
   if (!newEvents.length) {
@@ -125,13 +147,18 @@ function renderEvents() {
     return;
   }
 
-  c.innerHTML = newEvents.map(e => {
-    const safeId = e.name.replace(/[^a-z0-9]/gi, '_');
+  const groups = groupByDueDate(newEvents);
+
+  c.innerHTML = Object.entries(groups).map(([dueDate, groupEvents]) => {
+    const safeId = dueDate.replace(/[^a-z0-9]/gi, '_');
+    const eventList = groupEvents.map(e =>
+      `<div class="sub-event">• ${e.name}</div>`
+    ).join('');
     return `<div class="event-row" onclick="toggleCheck('${safeId}')">
       <input type="checkbox" id="chk-${safeId}" checked onchange="updateBtn()" onclick="event.stopPropagation()">
       <div class="event-info">
-        <div class="name">${e.name || 'Untitled'}</div>
-        <div class="meta">${e.date}${e.time ? ' | ' + e.time : ''}</div>
+        <div class="name">${dueDate}</div>
+        <div class="sub-events">${eventList}</div>
       </div>
       <span class="badge badge-new" id="badge-${safeId}">New</span>
     </div>`;
@@ -142,7 +169,7 @@ function renderEvents() {
 
 function toggleCheck(safeId) {
   const chk = document.getElementById('chk-' + safeId);
-  if (chk) { chk.checked = !chk.checked; updateBtn(); }
+  if (chk && !chk.disabled) { chk.checked = !chk.checked; updateBtn(); }
 }
 
 async function loadEvents() {
@@ -199,9 +226,9 @@ async function runAutomation() {
         log('✅ ' + r.name);
         generatedFiles[r.filename] = r.mjml;
         successCount++;
-        // Update badges for all events in this group
-        if (r.events) r.events.forEach(eName => setBadge(eName, 'done', 'Ready ✓'));
-        else setBadge(r.name, 'done', 'Ready ✓');
+        // Update badge for due date group
+        const groupSafeId = r.filename.replace('.mjml', '');
+        setBadge(groupSafeId, 'done', 'Ready ✓');
         const div = document.createElement('div');
         div.className = 'download-item';
         const subText = r.events && r.events.length > 1 ? '<div style="font-size:11px;color:#999;margin-top:2px;">' + r.events.join(', ') + '</div>' : '';
@@ -209,7 +236,8 @@ async function runAutomation() {
         dlList.appendChild(div);
       } else {
         log('❌ ' + r.name + ': ' + r.error);
-        if (r.events) r.events.forEach(eName => setBadge(eName, 'error', 'Error'));
+        const errSafeId = r.filename ? r.filename.replace('.mjml', '') : r.name.replace(/[^a-z0-9]/gi, '_');
+        setBadge(errSafeId, 'error', 'Error');
       }
     });
 
