@@ -69,28 +69,52 @@ def format_datetime(date, time_str):
     return f"{date} | {time_str}" if time_str else date
 
 def get_base_html():
-    res = requests.get(f"{MJ_BASE}/template?Limit=100", auth=MJ_AUTH)
-    templates = res.json().get('Data', [])
-    base = next((t for t in templates if 'cobysbasetemplate' in t['Name'].lower()), None)
-    if not base:
-        return None, 'CobysBaseTemplate not found.'
-    res2 = requests.get(f"{MJ_BASE}/template/{base['ID']}/detailcontent", auth=MJ_AUTH)
-    content = res2.json()
-    if 'Data' not in content or not content['Data']:
-        return None, 'CobysBaseTemplate has no HTML content.'
-    return content['Data'][0].get('Html-part', ''), None
+    # Use BaseTemplate (ID 7993157) - original HTML import with drag-and-drop support
+    res = requests.get(f"{MJ_BASE}/template/7993157/detailcontent", auth=MJ_AUTH)
+    data = res.json()
+    if 'Data' not in data or not data['Data']:
+        return None, 'BaseTemplate not found or has no HTML content.'
+    return data['Data'][0].get('Html-part', ''), None
 
 def fill_template(html, event):
+    name  = event['name']
+    date  = format_datetime(event['date'], event['time'])
+    desc  = event['desc']
+    txt1  = event['signupText1'] or 'General Ticket'
+    lnk1  = event['signupLink1'] if event['signupLink1'].startswith('http') else '#'
+    txt2  = event['signupText2']
+    lnk2  = event['signupLink2'] if event['signupLink2'].startswith('http') else ''
+    image = event['image']
+
     out = html
-    out = out.replace('{{var:event_name}}', event['name'])
-    out = out.replace('{{var:date}}', format_datetime(event['date'], event['time']))
-    out = out.replace('{{var:description}}', event['desc'])
-    out = out.replace('{{var:signup_text1}}', event['signupText1'] or 'General Ticket')
-    out = out.replace('{{var:signup_link1}}', event['signupLink1'] if event['signupLink1'].startswith('http') else '#')
-    out = out.replace('{{var:signup_text2}}', event['signupText2'] or '')
-    out = out.replace('{{var:signup_link2}}', event['signupLink2'] if event['signupLink2'].startswith('http') else '#')
-    if event['image'] and event['image'].startswith('http'):
-        out = out.replace('{{var:image}}', event['image'])
+
+    # Replace title
+    out = out.replace('Cinco de Mayo Fiesta', name)
+
+    # Replace date
+    out = out.replace('May 1 | 6-8PM', date)
+
+    # Replace description
+    out = out.replace('Festive night with a taco bar for people,<br>dog tacos &amp; pawgaritas, and photo ops!', desc)
+    out = out.replace('Festive night with a taco bar for people,<br>dog tacos & pawgaritas, and photo ops!', desc)
+
+    # Replace button 1
+    out = out.replace('https://square.link/u/RmROzE8s', lnk1)
+    out = out.replace('General Ticket', txt1)
+
+    # Replace button 2 or remove if empty
+    if txt2 and lnk2:
+        out = out.replace('https://square.link/u/O3jhGhi1', lnk2)
+        out = out.replace('Member Free Sign Up', txt2)
+    else:
+        import re as _re
+        out = _re.sub(r"<tr><td[^>]*>(?:(?!<tr>).)*?Member Free Sign Up(?:(?!<tr>).)*?</td></tr>", '', out, flags=_re.DOTALL)
+        out = out.replace('Member Free Sign Up', '')
+
+    # Replace image
+    if image and image.startswith('http'):
+        out = out.replace('https://sjqzn.mjt.lu/img2/sjqzn/1ef5c329-24ef-45e8-9010-9d1d6393531e/content', image)
+
     return out
 
 def mark_done(event_name):
