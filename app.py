@@ -212,6 +212,32 @@ def run_all_events_background(job_id, new_events, base_html):
             results.append({'name': event_name, 'status': 'error', 'error': str(e)})
     jobs[job_id] = {'status': 'done', 'results': results}
 
+@app.route('/api/debug', methods=['GET'])
+def debug():
+    import sys
+    result = {
+        'python': sys.version,
+        'base_dir': BASE_DIR,
+        'files': os.listdir(BASE_DIR),
+        'env_email': bool(MAILJET_EMAIL),
+        'env_password': bool(MAILJET_PASSWORD),
+    }
+    try:
+        res = requests.get(SHEET_CSV_URL, timeout=10)
+        result['sheet_status'] = res.status_code
+        events = parse_csv(res.text)
+        result['total_events'] = len(events)
+        result['new_events'] = len([e for e in events if e['status'].lower() == 'new'])
+    except Exception as e:
+        result['sheet_error'] = str(e)
+    try:
+        base_html, error = get_base_html()
+        result['base_html_length'] = len(base_html) if base_html else 0
+        result['base_html_error'] = error
+    except Exception as e:
+        result['base_html_error'] = str(e)
+    return jsonify(result)
+
 @app.route('/api/test', methods=['GET'])
 def test_playwright():
     try:
