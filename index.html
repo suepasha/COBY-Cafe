@@ -2,58 +2,284 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Coby's Cafe — Email Automation</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f0; color: #2d2d2d; padding: 2rem 1rem; }
-  .container { max-width: 680px; margin: 0 auto; }
-  .header { text-align: center; margin-bottom: 2rem; }
-  h1 { font-size: 22px; font-weight: 700; margin-bottom: 2px; }
-  .subtitle { font-size: 13px; color: #999; }
-  .card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e0; padding: 1.5rem; margin-bottom: 1.25rem; }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .card-header h2 { font-size: 13px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-  .select-all { font-size: 12px; color: #1a6fa8; cursor: pointer; background: none; border: none; padding: 0; }
-  .select-all:hover { text-decoration: underline; }
-  .event-row { border: 1px solid #eee; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background 0.15s; }
-  .event-row:hover { background: #fafafa; }
-  .event-row input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; accent-color: #2d2d2d; }
-  .event-info { flex: 1; }
-  .name { font-size: 14px; font-weight: 600; }
-  .meta { font-size: 12px; color: #999; margin-top: 2px; }
-  .badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-  .badge-new { background: #e8f4fd; color: #1a6fa8; }
-  .badge-error { background: #fde8e8; color: #a01010; }
-  .big-btn { display: block; width: 100%; padding: 14px; background: #2d2d2d; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 1rem; transition: background 0.2s; }
-  .big-btn:hover { background: #444; }
-  .big-btn:disabled { background: #bbb; cursor: not-allowed; }
-  #log { background: #1a1a1a; color: #00e87a; font-family: monospace; font-size: 12px; padding: 1rem; border-radius: 8px; min-height: 60px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; margin-top: 1rem; display: none; }
-  .downloads { margin-top: 1.5rem; display: none; }
-  .downloads h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
-  .download-item { background: #f5f5f0; border: 1px solid #e0e0d8; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .download-item .dname { font-size: 13px; font-weight: 600; }
-  .dl-btn { padding: 7px 16px; background: #2d2d2d; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .dl-btn:hover { background: #444; }
-  .instructions { background: #e8f4fd; border: 1px solid #b0d0f0; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; }
-  .instructions h3 { font-size: 14px; font-weight: 600; color: #1a6fa8; margin-bottom: 8px; }
-  .instructions ol { font-size: 13px; color: #333; line-height: 2.2; padding-left: 1.2rem; }
-  .empty { font-size: 13px; color: #888; text-align: center; padding: 16px; background: #f9f9f7; border-radius: 8px; }
-  .sub-events { margin-top: 4px; }
-  .sub-event { font-size: 12px; color: #888; line-height: 1.8; }
+  :root {
+    --brand: #e0d3c3;
+    --brand-dark: #c8b8a4;
+    --bg: #f7f5f2;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --text-light: #888;
+    --accent: #1a6fa8;
+    --green: #1a8a4a;
+    --red: #c0392b;
+    --border: #e8e4de;
+    --radius: 14px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  }
+
+  .app {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 1.5rem 0 1.25rem;
+  }
+  .header h1 {
+    font-size: clamp(20px, 5vw, 26px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    font-size: clamp(11px, 3vw, 13px);
+    color: var(--text-light);
+    margin-top: 3px;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .card-header h2 {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .select-all {
+    font-size: 12px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    font-weight: 600;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* EVENT ROW */
+  .event-row {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .event-row:active { background: #f5f2ee; }
+
+  .event-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    margin-top: 1px;
+    cursor: pointer;
+    accent-color: var(--text);
+    border-radius: 4px;
+  }
+  .event-info { flex: 1; min-width: 0; }
+  .event-due {
+    font-size: clamp(13px, 3.5vw, 15px);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .sub-events { margin-top: 5px; }
+  .sub-event {
+    font-size: clamp(11px, 3vw, 12px);
+    color: var(--text-light);
+    line-height: 1.9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .badge-new { background: #deeef9; color: var(--accent); }
+  .badge-done { background: #d4f0e0; color: var(--green); }
+  .badge-error { background: #fde8e8; color: var(--red); }
+
+  /* BUTTON */
+  .big-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: clamp(14px, 4vw, 16px);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    min-height: 54px;
+    letter-spacing: 0.2px;
+  }
+  .big-btn:active { transform: scale(0.99); }
+  .big-btn:disabled { background: #bbb; cursor: not-allowed; transform: none; }
+
+  /* LOG */
+  #log {
+    background: #1a1a1a;
+    color: #00e87a;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: clamp(10px, 2.5vw, 12px);
+    padding: 1rem;
+    border-radius: 10px;
+    min-height: 56px;
+    max-height: 180px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-top: 1rem;
+    display: none;
+    line-height: 1.6;
+  }
+
+  /* DOWNLOADS */
+  .downloads { margin-top: 1rem; display: none; }
+  .downloads h3 {
+    font-size: clamp(13px, 3.5vw, 14px);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .download-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .download-item .dname {
+    font-size: clamp(12px, 3vw, 13px);
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+    word-break: break-word;
+  }
+  .download-item .dsub {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 2px;
+    word-break: break-word;
+  }
+  .dl-btn {
+    padding: 10px 18px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: clamp(12px, 3vw, 13px);
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+  .dl-btn:active { background: #444; }
+
+  /* INSTRUCTIONS */
+  .instructions {
+    background: #eaf4fd;
+    border: 1px solid #b8d8f0;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin-top: 1rem;
+  }
+  .instructions h3 {
+    font-size: clamp(12px, 3vw, 13px);
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .instructions ol {
+    font-size: clamp(12px, 3vw, 13px);
+    color: #333;
+    padding-left: 1.2rem;
+    line-height: 2.2;
+  }
+
+  /* EMPTY */
+  .empty {
+    font-size: clamp(12px, 3vw, 13px);
+    color: var(--text-light);
+    text-align: center;
+    padding: 18px;
+    background: #faf9f7;
+    border-radius: 10px;
+  }
+
+  /* SCROLLBAR */
+  #log::-webkit-scrollbar { width: 4px; }
+  #log::-webkit-scrollbar-track { background: #333; }
+  #log::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+
+  @media (max-width: 480px) {
+    .app { padding: 1rem 0.75rem 2rem; }
+    .card { padding: 1rem; }
+    .event-row { padding: 11px 12px; gap: 10px; }
+    .download-item { padding: 11px 12px; }
+  }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="app">
   <div class="header">
     <h1>🐾 Coby's Cafe</h1>
-    <p class="subtitle">Email Template Automation</p>
+    <p>Email Template Automation</p>
   </div>
 
   <div class="card">
     <div class="card-header">
       <h2>📋 Upcoming Events</h2>
-      <button class="select-all" onclick="toggleAll()" id="selectAllBtn">Deselect All</button>
+      <button class="select-all" id="selectAllBtn" onclick="toggleAll()">Deselect All</button>
     </div>
     <div id="events-list"><p class="empty">Loading events...</p></div>
   </div>
@@ -70,7 +296,7 @@
     <div class="instructions">
       <h3>📤 Import into Mailjet</h3>
       <ol>
-        <li>Go to <strong>Mailjet → Content → Email Templates</strong></li>
+        <li>Go to <strong>Content → Email Templates</strong></li>
         <li>Click <strong>"Create a template"</strong></li>
         <li>Choose <strong>"By coding it in MJML"</strong></li>
         <li>Import the downloaded <strong>.mjml</strong> file</li>
@@ -90,10 +316,20 @@ const log = msg => {
   el.scrollTop = el.scrollHeight;
 };
 
-const setBadge = (name, type, label) => {
-  const el = document.getElementById('badge-' + name.replace(/[^a-z0-9]/gi, '_'));
+const setBadge = (safeId, type, label) => {
+  const el = document.getElementById('badge-' + safeId);
   if (el) { el.className = 'badge badge-' + type; el.textContent = label; }
 };
+
+function groupByDueDate(evts) {
+  const groups = {};
+  evts.forEach(e => {
+    const due = e.dueDate && e.dueDate.trim() ? e.dueDate.trim() : 'No Due Date';
+    if (!groups[due]) groups[due] = [];
+    groups[due].push(e);
+  });
+  return groups;
+}
 
 const getSelected = () => {
   const newEvents = events.filter(e => e.status.toLowerCase() === 'new');
@@ -126,19 +362,13 @@ function toggleAll() {
   updateBtn();
 }
 
-function groupByDueDate(evts) {
-  const groups = {};
-  evts.forEach(e => {
-    const due = e.dueDate && e.dueDate.trim() ? e.dueDate.trim() : 'No Due Date';
-    if (!groups[due]) groups[due] = [];
-    groups[due].push(e);
-  });
-  return groups;
+function toggleCheck(safeId) {
+  const chk = document.getElementById('chk-' + safeId);
+  if (chk && !chk.disabled) { chk.checked = !chk.checked; updateBtn(); }
 }
 
 function renderEvents() {
   const c = document.getElementById('events-list');
-
   const newEvents = events.filter(e => e.status.toLowerCase() === 'new');
 
   if (!newEvents.length) {
@@ -148,16 +378,13 @@ function renderEvents() {
   }
 
   const groups = groupByDueDate(newEvents);
-
   c.innerHTML = Object.entries(groups).map(([dueDate, groupEvents]) => {
     const safeId = dueDate.replace(/[^a-z0-9]/gi, '_');
-    const eventList = groupEvents.map(e =>
-      `<div class="sub-event">• ${e.name}</div>`
-    ).join('');
+    const eventList = groupEvents.map(e => `<div class="sub-event">• ${e.name}</div>`).join('');
     return `<div class="event-row" onclick="toggleCheck('${safeId}')">
       <input type="checkbox" id="chk-${safeId}" checked onchange="updateBtn()" onclick="event.stopPropagation()">
       <div class="event-info">
-        <div class="name">${dueDate}</div>
+        <div class="event-due">${dueDate}</div>
         <div class="sub-events">${eventList}</div>
       </div>
       <span class="badge badge-new" id="badge-${safeId}">New</span>
@@ -165,11 +392,6 @@ function renderEvents() {
   }).join('');
 
   updateBtn();
-}
-
-function toggleCheck(safeId) {
-  const chk = document.getElementById('chk-' + safeId);
-  if (chk && !chk.disabled) { chk.checked = !chk.checked; updateBtn(); }
 }
 
 async function loadEvents() {
@@ -180,7 +402,7 @@ async function loadEvents() {
     events = data.events;
     renderEvents();
   } catch(e) {
-    document.getElementById('events-list').innerHTML = `<p style="color:red;font-size:13px;">Error: ${e.message}</p>`;
+    document.getElementById('events-list').innerHTML = `<p style="color:var(--red);font-size:13px;padding:8px;">Error: ${e.message}</p>`;
   }
 }
 
@@ -204,7 +426,7 @@ async function runAutomation() {
   document.getElementById('downloads').style.display = 'none';
   generatedFiles = {};
 
-  log(`Generating ${selected.length} template(s)...`);
+  log(`Generating templates for ${selected.length} event(s)...`);
 
   try {
     const res = await fetch('/api/run', {
@@ -226,18 +448,19 @@ async function runAutomation() {
         log('✅ ' + r.name);
         generatedFiles[r.filename] = r.mjml;
         successCount++;
-        // Update badge for due date group
-        const groupSafeId = r.filename.replace('.mjml', '');
-        setBadge(groupSafeId, 'done', 'Ready ✓');
+        const safeId = r.filename.replace('.mjml', '');
+        setBadge(safeId, 'done', 'Ready ✓');
+        const subText = r.events && r.events.length > 1
+          ? `<div class="dsub">${r.events.join(' · ')}</div>` : '';
         const div = document.createElement('div');
         div.className = 'download-item';
-        const subText = r.events && r.events.length > 1 ? '<div style="font-size:11px;color:#999;margin-top:2px;">' + r.events.join(', ') + '</div>' : '';
-        div.innerHTML = `<div><div class="dname">${r.name}</div>${subText}</div><button class="dl-btn" onclick="downloadFile('${r.filename}')">⬇ Download</button>`;
+        div.innerHTML = `<div><div class="dname">${r.name}</div>${subText}</div>
+          <button class="dl-btn" onclick="downloadFile('${r.filename}')">⬇ Download</button>`;
         dlList.appendChild(div);
       } else {
-        log('❌ ' + r.name + ': ' + r.error);
-        const errSafeId = r.filename ? r.filename.replace('.mjml', '') : r.name.replace(/[^a-z0-9]/gi, '_');
-        setBadge(errSafeId, 'error', 'Error');
+        log('❌ ' + r.name + ': ' + (r.error || 'Unknown error'));
+        const safeId = r.filename ? r.filename.replace('.mjml','') : r.name.replace(/[^a-z0-9]/gi,'_');
+        setBadge(safeId, 'error', 'Error');
       }
     });
 
