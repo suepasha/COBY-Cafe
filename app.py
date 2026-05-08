@@ -41,8 +41,11 @@ ALIASES = {
 
 MJML_OPEN = """<mjml version="4.14.1">
   <mj-head>
-    <mj-font href="https://fonts.googleapis.com/css2?family=Josefin%20Sans:wght@300;400;500;700;800;900" name="Josefin Sans, Arial, sans-serif"></mj-font>
+    <mj-font href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap" name="Josefin Sans"></mj-font>
     <mj-preview></mj-preview>
+    <mj-style inline="inline">
+      * { font-family: 'Josefin Sans', Arial, sans-serif !important; }
+    </mj-style>
     <mj-style>
       @media only screen and (max-width: 480px) {
         .event-title { font-size: 22px !important; line-height: 30px !important; }
@@ -54,10 +57,12 @@ MJML_OPEN = """<mjml version="4.14.1">
     </mj-style>
     <mj-attributes>
       <mj-all font-family="'Josefin Sans', Arial, sans-serif"></mj-all>
+      <mj-text font-family="'Josefin Sans', Arial, sans-serif"></mj-text>
+      <mj-button font-family="'Josefin Sans', Arial, sans-serif"></mj-button>
       <mj-image fluid-on-mobile="true"></mj-image>
     </mj-attributes>
   </mj-head>
-  <mj-body background-color="#ffffff" color="#8b94a7" font-family="Josefin Sans, Arial, sans-serif">
+  <mj-body background-color="#ffffff" color="#222222" font-family="'Josefin Sans', Arial, sans-serif">
     <mj-section background-color="#ffffff" padding="0px">
       <mj-column>
         <mj-image align="center" alt="" border="none" container-background-color="#e0d3c3" height="auto" padding="10px 25px" src="https://sjqzn.mjt.lu/img2/sjqzn/519a4db6-cda9-4e32-8e6f-608386b2fadd/content" width="200px"></mj-image>
@@ -68,12 +73,12 @@ MJML_EVENT_SECTION = """
     <mj-section background-color="#f4f4f4" padding="5px 0px">
       <mj-column>
         <mj-text padding="0px" passport-element="html" width="100%">
-          <p style="font-family:'Josefin Sans',Arial,sans-serif;font-size:28px;font-weight:bold;text-align:center;color:#000000;line-height:36px;margin:20px 30px 10px 30px;">EVENT_TITLE</p>
+          <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:28px;font-weight:bold;text-align:center;color:#000000;line-height:36px;margin:20px 30px 10px 30px;">EVENT_TITLE</p>
         </mj-text>
-        <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding="10px 25px 15px" src="EVENT_IMAGE" width="320px" fluid-on-mobile="true"></mj-image>
+        <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding="10px 25px 15px" src="EVENT_IMAGE" width="350px" fluid-on-mobile="true"></mj-image>
         <mj-text padding="0px" passport-element="html" width="100%">
-          <p style="font-family:'Josefin Sans',Arial,sans-serif;font-size:22px;font-weight:bold;text-align:center;color:#000000;line-height:30px;margin:5px 20px;"><strong>EVENT_DATE</strong></p>
-          <p style="font-family:'Josefin Sans',Arial,sans-serif;font-size:19px;font-weight:normal;text-align:center;color:#000000;line-height:28px;margin:8px 30px;">EVENT_DESCRIPTION</p>
+          <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:22px;font-weight:bold;text-align:center;color:#000000;line-height:30px;margin:5px 20px;"><strong>EVENT_DATE</strong></p>
+          <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:19px;font-weight:normal;text-align:center;color:#000000;line-height:28px;margin:8px 30px;">EVENT_DESCRIPTION</p>
         </mj-text>
         <mj-button href="SIGNUP_LINK1"
           align="center"
