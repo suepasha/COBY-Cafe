@@ -44,7 +44,7 @@ MJML_OPEN = """<mjml version="4.14.1">
     <mj-font href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap" name="Josefin Sans"></mj-font>
     <mj-preview></mj-preview>
     <mj-style inline="inline">
-      * { font-family: 'Josefin Sans', Arial, sans-serif !important; }
+      p, span, td, div, a { font-family: 'Josefin Sans', Arial, sans-serif !important; }
     </mj-style>
     <mj-style>
       @media only screen and (max-width: 480px) {
@@ -59,7 +59,6 @@ MJML_OPEN = """<mjml version="4.14.1">
       <mj-all font-family="'Josefin Sans', Arial, sans-serif"></mj-all>
       <mj-text font-family="'Josefin Sans', Arial, sans-serif"></mj-text>
       <mj-button font-family="'Josefin Sans', Arial, sans-serif"></mj-button>
-      <mj-image fluid-on-mobile="true"></mj-image>
     </mj-attributes>
   </mj-head>
   <mj-body background-color="#ffffff" color="#222222" font-family="'Josefin Sans', Arial, sans-serif">
@@ -75,33 +74,25 @@ MJML_EVENT_SECTION = """
         <mj-text padding="0px" passport-element="html" width="100%">
           <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:28px;font-weight:bold;text-align:center;color:#000000;line-height:36px;margin:20px 30px 10px 30px;">EVENT_TITLE</p>
         </mj-text>
-        <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding="10px 25px 15px" src="EVENT_IMAGE" width="350px" fluid-on-mobile="true"></mj-image>
+        <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding="10px 25px 15px" src="EVENT_IMAGE" width="350px"></mj-image>
         <mj-text padding="0px" passport-element="html" width="100%">
           <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:22px;font-weight:bold;text-align:center;color:#000000;line-height:30px;margin:5px 20px;"><strong>EVENT_DATE</strong></p>
           <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:19px;font-weight:normal;text-align:center;color:#000000;line-height:28px;margin:8px 30px;">EVENT_DESCRIPTION</p>
         </mj-text>
-        <mj-text align="center" padding="8px 25px">
-          <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto;">
-            <tr>
-              <td align="center" style="border:1px solid #000000;border-radius:10px;padding:12px 40px;background-color:#FFFFFF;">
-                <a href="SIGNUP_LINK1" style="font-family:'Josefin Sans',Arial,sans-serif;font-size:19px;font-weight:bold;color:#000000;text-decoration:none;display:inline-block;white-space:nowrap;">SIGNUP_TEXT1</a>
-              </td>
-            </tr>
-          </table>
+        <mj-text padding="0px" passport-element="html" width="100%">
+          <p style="text-align:center;margin-top:10px;margin-bottom:5px;">
+            <a href="SIGNUP_LINK1" style="background-color:#FFFFFF !important;color:#000000 !important;border:1px solid #000000;border-radius:10px;padding:12px 40px;text-decoration:none !important;font-family:'Josefin Sans',Arial,sans-serif;font-size:19px;font-weight:bold;display:inline-block;">SIGNUP_TEXT1</a>
+          </p>
         </mj-text>
         BUTTON2_PLACEHOLDER
         <mj-divider border-color="#E6E6E6" border-style="solid" border-width="2px" padding="10px 25px" width="100%"></mj-divider>
       </mj-column>
     </mj-section>"""
 
-MJML_BUTTON2 = """<mj-text align="center" padding="5px 25px">
-          <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto;">
-            <tr>
-              <td align="center" style="border:1px solid #000000;border-radius:10px;padding:12px 40px;background-color:#FFFFFF;">
-                <a href="SIGNUP_LINK2" style="font-family:'Josefin Sans',Arial,sans-serif;font-size:19px;font-weight:bold;color:#000000;text-decoration:none;display:inline-block;white-space:nowrap;">SIGNUP_TEXT2</a>
-              </td>
-            </tr>
-          </table>
+MJML_BUTTON2 = """<mj-text padding="0px" passport-element="html" width="100%">
+          <p style="text-align:center;margin-top:8px;margin-bottom:5px;">
+            <a href="SIGNUP_LINK2" style="background-color:#FFFFFF !important;color:#000000 !important;border:1px solid #000000;border-radius:10px;padding:12px 40px;text-decoration:none !important;font-family:'Josefin Sans',Arial,sans-serif;font-size:19px;font-weight:bold;display:inline-block;">SIGNUP_TEXT2</a>
+          </p>
         </mj-text>"""
 
 MJML_CLOSE = """
