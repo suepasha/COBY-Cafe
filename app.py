@@ -74,7 +74,7 @@ MJML_EVENT_SECTION = """
         <mj-text padding="0px" passport-element="html" width="100%">
           <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:28px;font-weight:bold;text-align:center;color:#000000;line-height:36px;margin:20px 30px 10px 30px;">EVENT_TITLE</p>
         </mj-text>
-        <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding="10px 25px 15px" src="EVENT_IMAGE" width="350px"></mj-image>
+        <mj-image align="center" alt="" border-radius="10px" border="none" height="auto" padding="10px 25px 15px" src="EVENT_IMAGE" width="350px" fluid-on-mobile="true"></mj-image>
         <mj-text padding="0px" passport-element="html" width="100%">
           <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:22px;font-weight:bold;text-align:center;color:#000000;line-height:30px;margin:5px 20px;"><strong>EVENT_DATE</strong></p>
           <p style="font-family:'Josefin Sans',Arial,sans-serif !important;font-size:19px;font-weight:normal;text-align:center;color:#000000;line-height:28px;margin:8px 30px;">EVENT_DESCRIPTION</p>
